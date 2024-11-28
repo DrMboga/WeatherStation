@@ -1,10 +1,17 @@
 using System.Text.Json;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WeatherStationBackend.Data;
 using WeatherStationBackend.Model;
+using WeatherStationBackend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDbContextFactory<WeatherStationContext>(
+    options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("weather")));
+
+builder.Services.AddTransient<DataAccess>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 // http://localhost:5119/swagger/index.html
@@ -20,7 +27,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapPost("/savesensorreadings", ([FromBody]SensorData sensorData) => {
+app.MapPost("/savesensorreadings", ([FromBody]SensorData sensorData, DataAccess dataAccess) => {
     app.Logger.LogInformation($"Saved new sensor readings: '{JsonSerializer.Serialize(sensorData)}'");
     return Results.Ok();
 })
@@ -28,7 +35,7 @@ app.MapPost("/savesensorreadings", ([FromBody]SensorData sensorData) => {
 .WithOpenApi();
 
 // http://localhost:5119/getsensordata?dateFrom=56
-app.MapGet("/getsensordata", (long dateFrom) => {
+app.MapGet("/getsensordata", (long dateFrom, DataAccess dataAccess) => {
     app.Logger.LogInformation($"Trying to get sensor data from: {dateFrom}");
     var stubData = @"
     [
