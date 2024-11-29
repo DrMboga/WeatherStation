@@ -22,32 +22,36 @@ public static class SensorDataMapper
         };
     }
 
-    public static SensorData[] ToSensorData(this SensorDataModel[] sensorDataModel)
+    public static SensorData[] ToSensorDataArray(this SensorDataModel[] sensorDataModel)
     {
         var output = new List<SensorData>();
         foreach (var item in sensorDataModel)
         {
-            output.Add(new SensorData{
-                MeasurementTimeStamp = item.MeasurementTimeStamp,
-                Outside = new SensorInfo {
-                    Temperature = item.OutsideTemperature,
-                    Humidity = item.OutsideHumidity
-                },
-                Room1 = new SensorInfo {
-                    Temperature = item.Room1Temperature,
-                    Humidity = item.Room1Humidity
-                },
-                Room2 = new SensorInfo {
-                    Temperature = item.Room2Temperature,
-                    Humidity = item.Room2Humidity
-                },
-                Room3 = new SensorInfo {
-                    Temperature = item.Room3Temperature,
-                    Humidity = item.Room3Humidity
-                },
-            });
+            output.Add(ToSensorData(item));
         }
 
         return [..output];
+    }
+    public static SensorData ToSensorData(this SensorDataModel sensorDataModel)
+    {
+        return new SensorData{
+            MeasurementTimeStamp = sensorDataModel.MeasurementTimeStamp,
+            Outside = new SensorInfo {
+                Temperature = sensorDataModel.OutsideTemperature,
+                Humidity = sensorDataModel.OutsideHumidity
+            },
+            Room1 = new SensorInfo {
+                Temperature = sensorDataModel.Room1Temperature,
+                Humidity = sensorDataModel.Room1Humidity
+            },
+            Room2 = new SensorInfo {
+                Temperature = sensorDataModel.Room2Temperature,
+                Humidity = sensorDataModel.Room2Humidity
+            },
+            Room3 = new SensorInfo {
+                Temperature = sensorDataModel.Room3Temperature,
+                Humidity = sensorDataModel.Room3Humidity
+            },
+        };
     }
 }

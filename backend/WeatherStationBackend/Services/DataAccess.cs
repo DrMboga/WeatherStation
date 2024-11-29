@@ -29,7 +29,7 @@ public class DataAccess: IDataAccess
             {
                 return [];
             }
-            return sensorDataModel.ToSensorData();
+            return sensorDataModel.ToSensorDataArray();
         }
     }
 
@@ -40,6 +40,24 @@ public class DataAccess: IDataAccess
         {
             await context.Sensors.AddAsync(sensorDataModel);
             await context.SaveChangesAsync();
+        }
+    }
+
+    public async Task<SensorData?> GetLatestData()
+    {
+        using(var context = _dbContextFactory.CreateDbContext())
+        {
+            var latestData = await context.Sensors
+                .AsNoTracking()
+                .OrderByDescending(s => s.MeasurementTimeStamp)
+                .Take(1)
+                .FirstOrDefaultAsync();
+            if (latestData == null)
+            {
+                return null;
+            }
+
+            return latestData.ToSensorData();
         }
     }
 }

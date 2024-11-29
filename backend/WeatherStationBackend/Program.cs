@@ -20,6 +20,13 @@ builder.Services.AddHttpClient("AccuWeatherApi", c =>
     c.DefaultRequestHeaders.Add("User-Agent", "Mike's home Weather Station");
 });
 
+// Telegram bot api
+builder.Services.AddHttpClient("TelegramBotApi", c =>
+{
+    c.BaseAddress = new Uri("https://api.telegram.org/");
+    c.DefaultRequestHeaders.Add("Accept", "application/json");
+    c.DefaultRequestHeaders.Add("User-Agent", "Mike's home Weather Station");
+});
 
 // App settings
 var accuWeatherSettings = builder.Configuration
@@ -32,6 +39,7 @@ var backgroundWorkerSettings = builder.Configuration
 builder.Services.AddSingleton<BackgroundWorkerSettings>(backgroundWorkerSettings!);       
 
 builder.Services.AddTransient<IForecast, Forecast>();
+builder.Services.AddTransient<ITelegramBotService, TelegramBotService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 // http://localhost:5119/swagger/index.html
@@ -82,6 +90,13 @@ app.MapGet("/getweatherforecastnexttwelvehours", async(IForecast forecast) => {
     return Results.Ok(hourly);
 })
 .WithName("GetWeatherForecastNextTwelveHours")
+.WithOpenApi();
+
+app.MapPost("/sendinfototelegram", async(ITelegramBotService telegram) => {
+    await telegram.SendSensorsInfoAndForecast();
+    return Results.Ok();
+})
+.WithName("SendInfoToTelegram")
 .WithOpenApi();
 
 
