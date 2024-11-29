@@ -1,3 +1,4 @@
 {
-  "dotnet.defaultSolution": "WeatherStationBackend.sln"
+  "dotnet.defaultSolution": "WeatherStationBackend.sln",
+  "cSpell.words": ["Accu"]
 }

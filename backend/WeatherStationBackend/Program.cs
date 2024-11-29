@@ -12,6 +12,27 @@ builder.Services.AddDbContextFactory<WeatherStationContext>(
 
 builder.Services.AddTransient<IDataAccess, DataAccess>();
 
+// AccuWeather Api service
+builder.Services.AddHttpClient("AccuWeatherApi", c =>
+{
+    c.BaseAddress = new Uri("http://dataservice.accuweather.com/");
+    c.DefaultRequestHeaders.Add("Accept", "*/*");
+    c.DefaultRequestHeaders.Add("User-Agent", "Mike's home Weather Station");
+});
+
+
+// App settings
+var accuWeatherSettings = builder.Configuration
+                .GetSection("AccuWeather")
+                .Get<AccuWeatherSettings>();
+builder.Services.AddSingleton<AccuWeatherSettings>(accuWeatherSettings!);
+var backgroundWorkerSettings = builder.Configuration
+                .GetSection("BackgroundWorker")
+                .Get<BackgroundWorkerSettings>();
+builder.Services.AddSingleton<BackgroundWorkerSettings>(backgroundWorkerSettings!);       
+
+builder.Services.AddTransient<IForecast, Forecast>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 // http://localhost:5119/swagger/index.html
 builder.Services.AddEndpointsApiExplorer();
@@ -39,6 +60,28 @@ app.MapGet("/getsensordata", async (long dateFrom, IDataAccess dataAccess) => {
     return Results.Ok<SensorData[]>(sensorData);
 })
 .WithName("GetSensorData")
+.WithOpenApi();
+
+// /getweatherforecastlocations?postalCode=66111
+app.MapGet("/getweatherforecastlocations", async(string postalCode, IForecast forecast) => {
+    var locations = await forecast.GetLocationByPostalCode(postalCode);
+    return Results.Ok(locations);
+})
+.WithName("GetWeatherForecastLocations")
+.WithOpenApi();
+
+app.MapGet("/getweatherforecastnexthour", async(IForecast forecast) => {
+    var hourly = await forecast.GetNextHourForecast();
+    return Results.Ok(hourly);
+})
+.WithName("GetWeatherForecastNextHour")
+.WithOpenApi();
+
+app.MapGet("/getweatherforecastnexttwelvehours", async(IForecast forecast) => {
+    var hourly = await forecast.GetNextTwelveHoursForecast();
+    return Results.Ok(hourly);
+})
+.WithName("GetWeatherForecastNextTwelveHours")
 .WithOpenApi();
 
 
