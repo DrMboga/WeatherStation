@@ -21,10 +21,10 @@ public static class MarkdownHelper
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine($"## The home weather station wishes you a good {TimeOfTheDay()}");
         stringBuilder.AppendLine($"### As of {sensorsDate}:");
-        stringBuilder.AppendLine($" - Outside: {(sensorData.Outside?.Temperature ?? 0)}℃, {(sensorData.Outside?.Humidity ?? 0)}%");
-        stringBuilder.AppendLine($" - In Room 1: {(sensorData.Room1?.Temperature ?? 0)}℃, {(sensorData.Room1?.Humidity ?? 0)}%");
-        stringBuilder.AppendLine($" - In Room 2: {(sensorData.Room2?.Temperature ?? 0)}℃, {(sensorData.Room2?.Humidity ?? 0)}%");
-        stringBuilder.AppendLine($" - In Room 3: {(sensorData.Room3?.Temperature ?? 0)}℃, {(sensorData.Room3?.Humidity ?? 0)}%");
+        stringBuilder.AppendLine($" - Outside: {Convert.ToInt32(sensorData.Outside?.Temperature ?? 0)}℃, {Convert.ToInt32(sensorData.Outside?.Humidity ?? 0)}%");
+        stringBuilder.AppendLine($" - In Room 1: {Convert.ToInt32(sensorData.Room1?.Temperature ?? 0)}℃, {Convert.ToInt32(sensorData.Room1?.Humidity ?? 0)}%");
+        stringBuilder.AppendLine($" - In Room 2: {Convert.ToInt32(sensorData.Room2?.Temperature ?? 0)}℃, {Convert.ToInt32(sensorData.Room2?.Humidity ?? 0)}%");
+        stringBuilder.AppendLine($" - In Room 3: {Convert.ToInt32(sensorData.Room3?.Temperature ?? 0)}℃, {Convert.ToInt32(sensorData.Room3?.Humidity ?? 0)}%");
         stringBuilder.AppendLine("---");
         stringBuilder.AppendLine();
         return stringBuilder.ToString();
@@ -35,8 +35,8 @@ public static class MarkdownHelper
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine("### Weather forecast for the next 12 hours:");
 
-        var minTemp = forecast.Min(f => f.Temperature?.Value ?? 0);
-        var maxTemp = forecast.Max(f => f.Temperature?.Value ?? 0);
+        var minTemp = Convert.ToInt32(forecast.Min(f => f.Temperature?.Value ?? 0));
+        var maxTemp = Convert.ToInt32(forecast.Max(f => f.Temperature?.Value ?? 0));
         stringBuilder.AppendLine($" - Temperature from {minTemp}℃ to {maxTemp}℃");
 
         var precipitationHourly = forecast
