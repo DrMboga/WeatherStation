@@ -1,14 +1,11 @@
-#include <SimpleDHT.h>
+#include "dht.h"
+#include "lcd.h"
+
 #include <Wire.h>
-#include <LiquidCrystal.h>
 
 #define ITERATIONS_FOR_SCREEN_CHANGE (9)
 bool isTemperatureShowing = true;
 int currentIteration = 0;
-
-// DHT11
-int pinDHT11 = 15;
-SimpleDHT11 dht11(pinDHT11);
 
 // TCA multiplexer
 #define TCAADDR (0x70)
@@ -16,32 +13,6 @@ SimpleDHT11 dht11(pinDHT11);
 // Addresses for all GY-21 sensors
 #define GY21_ADDRESS (0x40)
 
-// LCD
-const uint8_t rs = 26;
-const uint8_t en = 25;
-const uint8_t d4 = 33;
-const uint8_t d5 = 32;
-const uint8_t d6 = 18;
-const uint8_t d7 = 19;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-
-void lcdSetup() {
-  lcd.begin(16,2);
-  lcd.clear();
-}
-
-
-void readDht11Data(float& temperature, float& humidity) {
-  temperature = 0;
-  humidity = 0;
-  int err = SimpleDHTErrSuccess;
-  if((err=dht11.read2(&temperature, &humidity, NULL)) != SimpleDHTErrSuccess){
-    Serial.print("Read DHT11 failed, err=");
-    Serial.println(err);
-    delay(2000);
-    return;
-  }
-}
 
 // --- GY-21
 void gy21Reset(uint8_t address) {
@@ -120,19 +91,6 @@ void TCA9548A(uint8_t bus) {
 }
 // ---
 
-int lcdCalculateStartColumn(int value) {
-  // 2 digit value or one digit with minus sign
-  if ((value >= 10 && value < 100)  ||
-    (value < 0 && value > -10)) {
-    return 1;
-  }
-  // One digit value
-  if ((value >= 0 && value < 10)) {
-    return 2;
-  }
-  // 3 digit value or 2 digit with minus sign
-  return 0;
-}
 
 void setup() { 
   Serial.begin(115200);
@@ -179,59 +137,27 @@ void loop() {
   if (ITERATIONS_FOR_SCREEN_CHANGE == currentIteration) {
     currentIteration = 0;
     isTemperatureShowing = !isTemperatureShowing;
-    lcd.clear();
+    lcdClear();
   }
 
-  lcd.setCursor(4, 0);
-  lcd.print("|");
-  lcd.setCursor(4, 1);
-  lcd.print("|");
-  lcd.setCursor(11, 1);
-  lcd.print("|");
+
   if (isTemperatureShowing) {
-    lcd.setCursor(lcdCalculateStartColumn((int)dht11Temperature), 0);
-    lcd.print((int)dht11Temperature);
-    lcd.setCursor(3, 0);
-    lcd.print((char)223); // Celsius symbol
-
-    lcd.setCursor(lcdCalculateStartColumn((int)gy211Temperature), 1);
-    lcd.print((int)gy211Temperature);
-    lcd.setCursor(3, 1);
-    lcd.print((char)223); // Celsius symbol
-
-    lcd.setCursor(6 + lcdCalculateStartColumn((int)gy212Temperature), 1);
-    lcd.print((int)gy212Temperature);
-    lcd.setCursor(9, 1);
-    lcd.print((char)223); // Celsius symbol
-
-    lcd.setCursor(12 + lcdCalculateStartColumn((int)gy213Temperature), 1);
-    lcd.print((int)gy213Temperature);
-    lcd.setCursor(15, 1);
-    lcd.print((char)223); // Celsius symbol
-
+    lcdShowTemeperature(
+      dht11Temperature,
+      gy211Temperature,
+      gy212Temperature,
+      gy213Temperature
+    );
   }
   else {
-    lcd.setCursor(lcdCalculateStartColumn((int)dht11Humidity), 0);
-    lcd.print((int)dht11Humidity);
-    lcd.setCursor(3, 0);
-    lcd.print("%");
-
-    lcd.setCursor(lcdCalculateStartColumn((int)gy211Humidity), 1);
-    lcd.print((int)gy211Humidity);
-    lcd.setCursor(3, 1);
-    lcd.print("%");
-
-    lcd.setCursor(6 + lcdCalculateStartColumn((int)gy212Humidity), 1);
-    lcd.print((int)gy212Humidity);
-    lcd.setCursor(9, 1);
-    lcd.print("%");
-
-    lcd.setCursor(12 + lcdCalculateStartColumn((int)gy213Humidity), 1);
-    lcd.print((int)gy213Humidity);
-    lcd.setCursor(15, 1);
-    lcd.print("%");
+    lcdShowHumidity(
+      dht11Humidity,
+      gy211Humidity,
+      gy212Humidity,
+      gy213Humidity
+    );
   }
-
+  
   Serial.print("DHT11 temperature: ");
   Serial.print((int)dht11Temperature);
   Serial.print("°, ");
