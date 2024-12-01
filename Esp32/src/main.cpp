@@ -2,7 +2,7 @@
 #include "lcd.h"
 #include "gy21.h"
 
-#define ITERATIONS_FOR_SCREEN_CHANGE (9)
+#define ITERATIONS_FOR_SCREEN_CHANGE (7)
 bool isTemperatureShowing = true;
 int currentIteration = 0;
 

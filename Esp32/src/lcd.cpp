@@ -32,8 +32,8 @@ void lcdClear() {
 }
 
 void setBorders() {
-    lcd.setCursor(4, 0);
-    lcd.print("|");
+    lcd.setCursor(0, 0);
+    lcd.print("    |");
     lcd.setCursor(4, 1);
     lcd.print("|");
     lcd.setCursor(11, 1);
