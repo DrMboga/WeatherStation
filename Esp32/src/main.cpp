@@ -1,10 +1,45 @@
 #include "dht.h"
 #include "lcd.h"
 #include "gy21.h"
+#include "secrets.h"
+
+#include <WiFi.h>
+
+/*
+Don't forget to add "secrets.h" to the project with this content:
+#define WIFI_SSID "your-SSID"
+#define WIFI_PASSWORD "your-PASSWORD"
+*/
 
 #define ITERATIONS_FOR_SCREEN_CHANGE (7)
 bool isTemperatureShowing = true;
 int currentIteration = 0;
+
+bool isOffline = true;
+
+void connectToWiFi() {
+  // Connect to Wi-Fi
+  Serial.print("Connecting to ");
+  Serial.println(WIFI_SSID);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  
+  for (size_t i = 0; i < 10; i++)
+  {
+    delay(500);
+    Serial.print(".");
+    if (WiFi.status() == WL_CONNECTED) {
+      isOffline = false;
+      break;
+    }
+  }
+  Serial.println("");
+  if (isOffline) {
+    Serial.println("WiFi not connected. Going to offline mode.");
+  }
+  else {
+    Serial.println("WiFi connected.");
+  }
+}
 
 void setup() { 
   Serial.begin(115200);
@@ -14,6 +49,8 @@ void setup() {
   if (!gy21Setup()) {
     Serial.println("Unable to setup GY-21 sensors or multiplexer.");
   }
+
+  connectToWiFi();
 }
 
 void loop() {
