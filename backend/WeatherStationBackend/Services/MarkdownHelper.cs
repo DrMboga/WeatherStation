@@ -20,11 +20,11 @@ public static class MarkdownHelper
         var sensorsDate = sensorData.MeasurementTimeStamp.ToDateTime().ToString("dd.MM.yyyy HH:mm");
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine($"## The home weather station wishes you a good {TimeOfTheDay()}");
-        stringBuilder.AppendLine($"### As of {sensorsDate}:");
-        stringBuilder.AppendLine($" - Outside: {Convert.ToInt32(sensorData.Outside?.Temperature ?? 0)}℃, {Convert.ToInt32(sensorData.Outside?.Humidity ?? 0)}%");
-        stringBuilder.AppendLine($" - In Room 1: {Convert.ToInt32(sensorData.Room1?.Temperature ?? 0)}℃, {Convert.ToInt32(sensorData.Room1?.Humidity ?? 0)}%");
-        stringBuilder.AppendLine($" - In Room 2: {Convert.ToInt32(sensorData.Room2?.Temperature ?? 0)}℃, {Convert.ToInt32(sensorData.Room2?.Humidity ?? 0)}%");
-        stringBuilder.AppendLine($" - In Room 3: {Convert.ToInt32(sensorData.Room3?.Temperature ?? 0)}℃, {Convert.ToInt32(sensorData.Room3?.Humidity ?? 0)}%");
+        stringBuilder.AppendLine($"### On {sensorsDate}:");
+        stringBuilder.AppendLine($" - It's: {Convert.ToInt32(sensorData.Outside?.Temperature ?? 0)}℃ outside, humidity {Convert.ToInt32(sensorData.Outside?.Humidity ?? 0)}%");
+        stringBuilder.AppendLine($" - In the first room {Convert.ToInt32(sensorData.Room1?.Temperature ?? 0)}℃, humidity {Convert.ToInt32(sensorData.Room1?.Humidity ?? 0)}%");
+        stringBuilder.AppendLine($" - In the second room {Convert.ToInt32(sensorData.Room2?.Temperature ?? 0)}℃, humidity {Convert.ToInt32(sensorData.Room2?.Humidity ?? 0)}%");
+        stringBuilder.AppendLine($" - In the third room: {Convert.ToInt32(sensorData.Room3?.Temperature ?? 0)}℃, humidity {Convert.ToInt32(sensorData.Room3?.Humidity ?? 0)}%");
         stringBuilder.AppendLine("---");
         stringBuilder.AppendLine();
         return stringBuilder.ToString();
@@ -51,7 +51,7 @@ public static class MarkdownHelper
         {
             foreach (var precipitationInfo in precipitationHourly)
             {
-                stringBuilder.AppendLine($" - Precipitation is expected at {precipitationInfo.Time} with a {precipitationInfo.Probability}% chance of precipitation.");
+                stringBuilder.AppendLine($" - Precipitation is expected at {precipitationInfo.Time} with a probability of {precipitationInfo.Probability}%.");
             }
         }
 
