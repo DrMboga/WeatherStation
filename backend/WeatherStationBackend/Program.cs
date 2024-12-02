@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Quartz;
 using WeatherStationBackend.Data;
+using WeatherStationBackend.Jobs;
 using WeatherStationBackend.Model;
 using WeatherStationBackend.Services;
 
@@ -40,6 +42,26 @@ builder.Services.AddSingleton<BackgroundWorkerSettings>(backgroundWorkerSettings
 
 builder.Services.AddTransient<IForecast, Forecast>();
 builder.Services.AddTransient<ITelegramBotService, TelegramBotService>();
+
+// Quartz scheduler
+builder.Services.AddQuartz(q =>
+{
+    var jobKey = new JobKey("SendWeatherInfoToTelegram");
+    q.AddJob<TelegramBotJob>(opts => opts.WithIdentity(jobKey));
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("weather-info-working-day-trigger")
+         //This Cron interval can be described as "Run every working day at 6:30"
+        .WithCronSchedule("0 30 6 ? * MON,TUE,WED,THU,FRI *")
+    );
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("weather-info-weekend-trigger")
+         //This Cron interval can be described as "Run every weekend day at 8:00"
+        .WithCronSchedule("0 0 8 ? * SUN,SAT *")
+    );
+});
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 // http://localhost:5119/swagger/index.html
