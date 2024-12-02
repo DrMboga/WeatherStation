@@ -52,12 +52,12 @@ public class TelegramBotService : ITelegramBotService
         _logger.LogInformation($"{client.BaseAddress}bot{_settings.TelegramBotToken}/sendMessage");
 
         var body = new {
-            parse_mode = "Markdown",
+            parse_mode = "HTML",
             text,
             chat_id = _settings.TelegramChatId
         };
         var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
-        // var response = await client.PostAsync($"{client.BaseAddress}bot{_settings.TelegramBotToken}/sendMessage", content);
-        // response.EnsureSuccessStatusCode();
+        var response = await client.PostAsync($"{client.BaseAddress}bot{_settings.TelegramBotToken}/sendMessage", content);
+        response.EnsureSuccessStatusCode();
     }
 }
