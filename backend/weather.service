@@ -1,0 +1,13 @@
+[Unit]
+Description=Weather station ASP.NET service
+[Service]
+Type=simple
+ExecStart=/home/pi/projects/weather/WeatherStationBackend
+WorkingDirectory=/home/pi/projects/weather
+User=pi
+Group=pi
+Restart=on-failure
+RestartSec=10
+KillMode=process
+[Install]
+WantedBy=multi-user.target
