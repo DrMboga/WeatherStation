@@ -3,6 +3,7 @@
 #include "gy21.h"
 #include "secrets.h"
 #include "ntp.h"
+#include "backendClient.h"
 
 #include <WiFi.h>
 
@@ -14,12 +15,18 @@ Don't forget to add "secrets.h" to the project with this content:
 
 float dht11Temperature = -99.0;
 float dht11Humidity = -99.0;
+String forecastWord = "  Offline  ";
 
 #define ITERATIONS_FOR_SCREEN_CHANGE (7)
 bool isTemperatureShowing = true;
 int currentIteration = 0;
 
 bool isOffline = true;
+
+// Hourly forecast schedule
+#define MINUTE_TO_GET_FORECAST 55 // Gets forecast every hour at 55 minutes
+int lastForecastHor = -1;
+
 
 void connectToWiFi() {
   // Connect to Wi-Fi
@@ -125,8 +132,15 @@ void loop() {
       Serial.print("Epoch: ");
       Serial.println(epoch);
     }
+
+    if (lastForecastHor < 0 || (MINUTE_TO_GET_FORECAST == timeInfo.tm_min && lastForecastHor != timeInfo.tm_hour)) {
+      Serial.println("Getting forecast");
+      forecastWord = getForecastWord();
+      lastForecastHor = timeInfo.tm_hour;
+    }
   }
 
+  showForecastWord(forecastWord);
   
   Serial.print("DHT11 temperature: ");
   Serial.print((int)dht11Temperature);
