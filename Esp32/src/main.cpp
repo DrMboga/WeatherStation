@@ -11,6 +11,9 @@ Don't forget to add "secrets.h" to the project with this content:
 #define WIFI_PASSWORD "your-PASSWORD"
 */
 
+float dht11Temperature = -99.0;
+float dht11Humidity = -99.0;
+
 #define ITERATIONS_FOR_SCREEN_CHANGE (7)
 bool isTemperatureShowing = true;
 int currentIteration = 0;
@@ -54,8 +57,8 @@ void setup() {
 }
 
 void loop() {
-  float dht11Temperature;
-  float dht11Humidity;
+  float currentDht11Temperature;
+  float currentDht11Humidity;
   float gy211Temperature;
   float gy211Humidity;
   float gy212Temperature;
@@ -63,7 +66,15 @@ void loop() {
   float gy213Temperature;
   float gy213Humidity;
 
-  readDht11Data(dht11Temperature, dht11Humidity);
+  readDht11Data(currentDht11Temperature, currentDht11Humidity);
+  // Sometimes dht11 reads data with error. In casee of error, it returns -99.
+  // In case of error, showing previous vaules
+  if (currentDht11Temperature > -90) {
+    dht11Temperature = currentDht11Temperature;
+  }
+  if (currentDht11Humidity > -90) {
+    dht11Humidity = currentDht11Humidity;
+  }
 
   readGy21Data(0, gy211Temperature, gy211Humidity);
   readGy21Data(1, gy212Temperature, gy212Humidity);
