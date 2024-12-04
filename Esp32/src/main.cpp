@@ -2,6 +2,7 @@
 #include "lcd.h"
 #include "gy21.h"
 #include "secrets.h"
+#include "ntp.h"
 
 #include <WiFi.h>
 
@@ -54,6 +55,10 @@ void setup() {
   }
 
   connectToWiFi();
+
+  if(!isOffline) {
+    configTime();
+  }
 }
 
 void loop() {
@@ -105,6 +110,23 @@ void loop() {
       gy213Humidity
     );
   }
+
+  if (!isOffline) {
+    struct tm timeInfo;
+    if (now(&timeInfo)) {
+      Serial.print(timeInfo.tm_hour);
+      Serial.print(":");
+      Serial.print(timeInfo.tm_min);
+      Serial.print(":");
+      Serial.println(timeInfo.tm_sec);
+    }
+    time_t epoch;
+    if(nowEpoch(&epoch)) {
+      Serial.print("Epoch: ");
+      Serial.println(epoch);
+    }
+  }
+
   
   Serial.print("DHT11 temperature: ");
   Serial.print((int)dht11Temperature);
