@@ -5,6 +5,7 @@
 #include <Arduino_JSON.h>
 
 const char* hourlyForecastUrl = "http://192.168.0.65:8830/getweatherforecastnexthour";
+const char* sendReadingsUrl = "http://192.168.0.65:8830/savesensorreadings";
 
 String getWordByIcon(int icon);
 
@@ -48,6 +49,47 @@ String getForecastWord() {
     // Free resources
     http.end();
     return response;
+}
+
+bool sendReadingsToBackend(
+    time_t epoch,
+    float outTemp,
+    float outHum,
+    float room1Temp,
+    float room1Hum,
+    float room2Temp,
+    float room2Hum,
+    float room3Temp,
+    float room3Hum
+) {
+    Serial.println("Send readings");
+    HTTPClient http;
+    http.begin(sendReadingsUrl);
+
+    http.addHeader("Content-Type", "application/json");
+    String httpRequestData = "{\"measurementTimeStamp\": ";
+    httpRequestData += String(epoch) + ",\"outside\": {\"temperature\":";
+    httpRequestData += String(outTemp) + ",\"humidity\": ";
+    httpRequestData += String(outHum) + "}, \"room1\": { \"temperature\": ";
+    httpRequestData += String(room1Temp) + ", \"humidity\": ";
+    httpRequestData += String(room1Hum) + " }, \"room2\": { \"temperature\": ";
+    httpRequestData += String(room2Temp) + ", \"humidity\": ";
+    httpRequestData += String(room2Hum) + " }, \"room3\": { \"temperature\": ";
+    httpRequestData += String(room3Temp) + ", \"humidity\": ";
+    httpRequestData += String(room3Hum) + " }}";
+
+    Serial.println(httpRequestData);
+
+    int httpResponseCode = http.POST(httpRequestData);
+
+    Serial.print("Response code: ");
+    Serial.println(httpResponseCode);
+
+    bool result = httpResponseCode > 0;
+
+    // Free resources
+    http.end();
+    return result;
 }
 
 

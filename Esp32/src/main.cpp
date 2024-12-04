@@ -27,6 +27,11 @@ bool isOffline = true;
 #define MINUTE_TO_GET_FORECAST 55 // Gets forecast every hour at 55 minutes
 int lastForecastHor = -1;
 
+// Sending sensor readings schedule
+#define MINUTE_TO_SEND_READINGS 55 // Sends readings to backend at 5:55, 11:55, 17:55, 23:55
+uint8_t sendReadingsHours[] = {5, 11, 17, 23};
+int lastSentReadingsHour = -1;
+
 
 void connectToWiFi() {
   // Connect to Wi-Fi
@@ -118,25 +123,42 @@ void loop() {
     );
   }
 
-  if (!isOffline) {
-    struct tm timeInfo;
-    if (now(&timeInfo)) {
+  struct tm timeInfo;
+  if (!isOffline && now(&timeInfo)) {
+    if (lastForecastHor < 0 || (MINUTE_TO_GET_FORECAST == timeInfo.tm_min && lastForecastHor != timeInfo.tm_hour)) {
       Serial.print(timeInfo.tm_hour);
       Serial.print(":");
       Serial.print(timeInfo.tm_min);
-      Serial.print(":");
-      Serial.println(timeInfo.tm_sec);
-    }
-    time_t epoch;
-    if(nowEpoch(&epoch)) {
-      Serial.print("Epoch: ");
-      Serial.println(epoch);
-    }
-
-    if (lastForecastHor < 0 || (MINUTE_TO_GET_FORECAST == timeInfo.tm_min && lastForecastHor != timeInfo.tm_hour)) {
-      Serial.println("Getting forecast");
+      Serial.println(" Getting forecast");
       forecastWord = getForecastWord();
       lastForecastHor = timeInfo.tm_hour;
+    }
+
+    bool sendReadingsThisHour = false;
+    for (size_t i = 0; i < 4; i++)
+    {
+        if (sendReadingsHours[i] == timeInfo.tm_hour) {
+          sendReadingsThisHour = true;
+          break;
+        }
+    }
+    if((lastSentReadingsHour < 0 && dht11Temperature > -90) ||
+    (MINUTE_TO_SEND_READINGS == timeInfo.tm_min && sendReadingsThisHour && lastSentReadingsHour != timeInfo.tm_hour)) {
+      time_t epoch;
+      if(nowEpoch(&epoch)) {
+        sendReadingsToBackend(
+          epoch,
+          dht11Temperature,
+          dht11Humidity,
+          gy211Temperature,
+          gy211Humidity,
+          gy212Temperature,
+          gy212Humidity,
+          gy213Temperature,
+          gy213Humidity
+        );
+        lastSentReadingsHour = timeInfo.tm_hour;
+      }
     }
   }
 
