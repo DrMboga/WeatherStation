@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
@@ -101,8 +102,17 @@ app.MapGet("/getweatherforecastlocations", async(string postalCode, IForecast fo
 .WithOpenApi();
 
 app.MapGet("/getweatherforecastnexthour", async(IForecast forecast) => {
-    var hourly = await forecast.GetNextHourForecast();
-    return Results.Ok(hourly);
+    try
+    {
+        var hourly = await forecast.GetNextHourForecast();
+        return Results.Ok(hourly);
+    } catch(HttpRequestException e){
+        // Error 503 from AccuWeather means that we exceeded daily requests limit for free tier
+        if (e.StatusCode == HttpStatusCode.ServiceUnavailable) {
+            return Results.StatusCode(503);
+        }
+        return Results.BadRequest(e.Message);
+    }
 })
 .WithName("GetWeatherForecastNextHour")
 .WithOpenApi();
