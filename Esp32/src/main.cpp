@@ -2,6 +2,8 @@
 #include "lcd.h"
 #include "gy21.h"
 #include "secrets.h"
+#include "ntp.h"
+#include "backendClient.h"
 
 #include <WiFi.h>
 
@@ -11,11 +13,25 @@ Don't forget to add "secrets.h" to the project with this content:
 #define WIFI_PASSWORD "your-PASSWORD"
 */
 
+float dht11Temperature = -99.0;
+float dht11Humidity = -99.0;
+String forecastWord = "  Offline  ";
+
 #define ITERATIONS_FOR_SCREEN_CHANGE (7)
 bool isTemperatureShowing = true;
 int currentIteration = 0;
 
 bool isOffline = true;
+
+// Hourly forecast schedule
+#define MINUTE_TO_GET_FORECAST 55 // Gets forecast every hour at 55 minutes
+int lastForecastHor = -1;
+
+// Sending sensor readings schedule
+#define MINUTE_TO_SEND_READINGS 55 // Sends readings to backend at 5:55, 11:55, 17:55, 23:55
+uint8_t sendReadingsHours[] = {5, 11, 17, 23};
+int lastSentReadingsHour = -1;
+
 
 void connectToWiFi() {
   // Connect to Wi-Fi
@@ -51,11 +67,15 @@ void setup() {
   }
 
   connectToWiFi();
+
+  if(!isOffline) {
+    configTime();
+  }
 }
 
 void loop() {
-  float dht11Temperature;
-  float dht11Humidity;
+  float currentDht11Temperature;
+  float currentDht11Humidity;
   float gy211Temperature;
   float gy211Humidity;
   float gy212Temperature;
@@ -63,7 +83,15 @@ void loop() {
   float gy213Temperature;
   float gy213Humidity;
 
-  readDht11Data(dht11Temperature, dht11Humidity);
+  readDht11Data(currentDht11Temperature, currentDht11Humidity);
+  // Sometimes dht11 reads data with error. In casee of error, it returns -99.
+  // In case of error, showing previous vaules
+  if (currentDht11Temperature > -90) {
+    dht11Temperature = currentDht11Temperature;
+  }
+  if (currentDht11Humidity > -90) {
+    dht11Humidity = currentDht11Humidity;
+  }
 
   readGy21Data(0, gy211Temperature, gy211Humidity);
   readGy21Data(1, gy212Temperature, gy212Humidity);
@@ -94,6 +122,47 @@ void loop() {
       gy213Humidity
     );
   }
+
+  struct tm timeInfo;
+  if (!isOffline && now(&timeInfo)) {
+    if (lastForecastHor < 0 || (MINUTE_TO_GET_FORECAST == timeInfo.tm_min && lastForecastHor != timeInfo.tm_hour)) {
+      Serial.print(timeInfo.tm_hour);
+      Serial.print(":");
+      Serial.print(timeInfo.tm_min);
+      Serial.println(" Getting forecast");
+      forecastWord = getForecastWord();
+      lastForecastHor = timeInfo.tm_hour;
+    }
+
+    bool sendReadingsThisHour = false;
+    for (size_t i = 0; i < 4; i++)
+    {
+        if (sendReadingsHours[i] == timeInfo.tm_hour) {
+          sendReadingsThisHour = true;
+          break;
+        }
+    }
+    if((lastSentReadingsHour < 0 && dht11Temperature > -90) ||
+    (MINUTE_TO_SEND_READINGS == timeInfo.tm_min && sendReadingsThisHour && lastSentReadingsHour != timeInfo.tm_hour)) {
+      time_t epoch;
+      if(nowEpoch(&epoch)) {
+        sendReadingsToBackend(
+          epoch,
+          dht11Temperature,
+          dht11Humidity,
+          gy211Temperature,
+          gy211Humidity,
+          gy212Temperature,
+          gy212Humidity,
+          gy213Temperature,
+          gy213Humidity
+        );
+        lastSentReadingsHour = timeInfo.tm_hour;
+      }
+    }
+  }
+
+  showForecastWord(forecastWord);
   
   Serial.print("DHT11 temperature: ");
   Serial.print((int)dht11Temperature);

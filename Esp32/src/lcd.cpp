@@ -8,6 +8,9 @@ const uint8_t d6 = 18;
 const uint8_t d7 = 19;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
+const uint8_t weatherStartSymbolIndex = 5;
+const uint8_t weatherSymbolsCount = 11;
+
 void lcdSetup() {
   lcd.begin(16,2);
   lcd.clear();
@@ -84,4 +87,16 @@ void lcdShowHumidity(float dht11Humidity, float gy211Humidity, float gy212Humidi
     lcd.print((int)gy213Humidity);
     lcd.setCursor(15, 1);
     lcd.print("%");
+}
+
+void showForecastWord(const String& word) {
+  //weatherStartSymbolIndex
+  int leadingSpaces = weatherSymbolsCount - word.length();
+  for (size_t i = 0; i < leadingSpaces; i++)
+  {
+    lcd.setCursor(i + weatherStartSymbolIndex, 0);
+    lcd.print(" ");
+  }
+  lcd.setCursor(leadingSpaces + weatherStartSymbolIndex, 0);
+  lcd.print(word);
 }
