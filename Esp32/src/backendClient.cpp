@@ -17,7 +17,7 @@ String getForecastWord() {
 
     int httpResponseCode = http.GET();
 
-    if (httpResponseCode > 0) {
+    if (httpResponseCode == 200) {
         Serial.print("HTTP Response code: ");
         Serial.println(httpResponseCode);
         String payload = http.getString();
@@ -40,6 +40,10 @@ String getForecastWord() {
            response = getWordByIcon(icon);
         }
       }
+      else if (httpResponseCode == 503) {
+        Serial.println("AccuWeather limit achieved");
+        response = "Limit exc.";
+      }  
       else {
         Serial.print("Error code: ");
         Serial.println(httpResponseCode);
