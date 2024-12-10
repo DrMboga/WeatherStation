@@ -22,6 +22,12 @@ The system integrates hardware, a custom backend, and third-party APIs to ensure
 
 ![Components](./Docs/Components.jpg)
 
+- [ESP32 board](https://www.az-delivery.de/en/products/esp-32-dev-kit-c-v4)
+- [Multiplexer](https://www.az-delivery.de/en/products/tca9548a-i2c-iic-multiplexer)
+- [GY-21](https://www.az-delivery.de/en/products/gy-21-temperatur-sensor-modul)
+- [DHT-11](https://www.az-delivery.de/en/products/5-x-dht11-temperatursensor)
+- [LCD](https://www.az-delivery.de/en/products/16x2-lcd-blaues-display)
+
 ### Sensors and Connectivity
 
 The system collects environmental data using four sensors:
