@@ -47,6 +47,7 @@ public class TelegramBotService : ITelegramBotService
     private async Task SendToTelegram(string text)
     {
         var client = _clientFactory.CreateClient("TelegramBotApi");
+        client.Timeout = TimeSpan.FromMinutes(10);
 
         _logger.LogInformation(text);
         _logger.LogInformation($"{client.BaseAddress}bot{_settings.TelegramBotToken}/sendMessage");

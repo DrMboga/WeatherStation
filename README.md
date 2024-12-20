@@ -14,7 +14,7 @@ The **Home Weather Station** uses an ESP32 microcontroller to collect and displa
 
 The system integrates hardware, a custom backend, and third-party APIs to ensure seamless functionality.
 
-> TODO: Ready device with screen Picture placeholder
+![Housing picture](./Docs/legoHousing.jpg)
 
 ---
 
@@ -24,8 +24,8 @@ The system integrates hardware, a custom backend, and third-party APIs to ensure
 
 - [ESP32 board](https://www.az-delivery.de/en/products/esp-32-dev-kit-c-v4)
 - [Multiplexer](https://www.az-delivery.de/en/products/tca9548a-i2c-iic-multiplexer)
-- [GY-21](https://www.az-delivery.de/en/products/gy-21-temperatur-sensor-modul)
-- [DHT-11](https://www.az-delivery.de/en/products/5-x-dht11-temperatursensor)
+- [GY-21 sensor](https://www.az-delivery.de/en/products/gy-21-temperatur-sensor-modul)
+- [DHT-11 sensor](https://www.az-delivery.de/en/products/5-x-dht11-temperatursensor)
 - [LCD](https://www.az-delivery.de/en/products/16x2-lcd-blaues-display)
 
 ### Sensors and Connectivity
@@ -108,7 +108,7 @@ The backend is a **.NET Web API** application hosted on a local Linux server. It
      - Compile this data into a summary message.
      - Send the message via the **Telegram Bot API** to a subscribed channel.
 
-> TODO: Telegram screenshot placeholder
+![Telegram message](./Docs/telegramMessage.jpg)
 
 This integration ensures that I get an automated weather summary on my phone every morning.
 

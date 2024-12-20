@@ -51,7 +51,7 @@ public static class MarkdownHelper
         {
             foreach (var precipitationInfo in precipitationHourly)
             {
-                stringBuilder.AppendLine($" - <i>{precipitationInfo.IconPhrase}</i> is expected at <b>{precipitationInfo.Time}</b> with a probability of <i>{precipitationInfo.Probability}%.</i>");
+                stringBuilder.AppendLine($" - <i>{precipitationInfo.IconPhrase}</i> expected at <b>{precipitationInfo.Time}</b> with a probability of <i>{precipitationInfo.Probability}%.</i>");
             }
         }
 
